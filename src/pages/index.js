@@ -15,19 +15,62 @@ const app = firebase.initializeApp(firebaseConfig)
 const db = app.firestore()
 
 class IndexPage extends React.Component {
+  currentRoundDocRef = null
+  roundsColletionRef = null
+  unsubscribeRoundChanges = () => {}
+
   constructor() {
     super()
 
     this.state = { currentRound: {} }
 
-    db.collection("rounds")
-      .get()
-      .then(querySnapshot => {
-        querySnapshot.forEach(doc => {
-          this.setState({ currentRound: doc.data() })
-          console.log(`${doc.id} => `, doc.data())
-        })
+    this.roundsColletionRef = db.collection("rounds")
+
+    this.roundsColletionRef
+      .orderBy("created", "desc")
+      .limit(1)
+      .onSnapshot(querySnapshot => {
+        console.log({ docs: querySnapshot.docs.map(doc => doc.data()) })
+        this.currentRoundDocRef =
+          querySnapshot.docs[querySnapshot.docs.length - 1].ref
+        this.unsubscribeRoundChanges()
+        this.unsubscribeRoundChanges = this.currentRoundDocRef.onSnapshot(
+          documentSnapshot => {
+            const currentRoundData = documentSnapshot.data()
+            console.log({ currentRoundData })
+            this.setState({ currentRound: currentRoundData })
+          }
+        )
       })
+  }
+
+  submitEstimation(event) {
+    console.log(`IndexPage::submitEstimation`, this.state.estimation)
+
+    const currentRound = { ...this.state.currentRound }
+    currentRound.estimations.push(this.state.estimation)
+
+    this.currentRoundDocRef.update(currentRound)
+  }
+
+  submitTask(event) {
+    console.log(`IndexPage::submitNewTask`, this.state.task)
+
+    this.roundsColletionRef.add({
+      estimations: [],
+      task: this.state.task,
+      visible: false,
+      created: new Date(),
+    })
+  }
+
+  toggleVisibility(event) {
+    console.log(`IndexPage::toggleVisibility`, this.state.task)
+
+    const currentRound = { ...this.state.currentRound }
+    currentRound.visible = !currentRound.visible
+
+    this.currentRoundDocRef.update(currentRound)
   }
 
   render() {
@@ -35,21 +78,56 @@ class IndexPage extends React.Component {
       <Layout>
         <SEO title="Home" />
         <h1>{this.state.docId}</h1>
-        Questions is: {this.state.currentRound.question}
-        {this.state.currentRound.answers && (
+        Task to estimate: <b>{this.state.currentRound.task}</b>
+        {this.state.currentRound.visible && (
           <div>
             <br />
             <br />
-            Answers: {this.state.currentRound.answers.join(", ")}
+            Estimations: {this.state.currentRound.estimations.join(", ")}
           </div>
         )}
         <br />
         <br />
-        <button>Reveal Answers</button>
+        {this.state.currentRound.visible ? (
+          <button onClick={this.toggleVisibility.bind(this)}>
+            Hide Estimations
+          </button>
+        ) : (
+          <button onClick={this.toggleVisibility.bind(this)}>
+            Reveal Estimations
+          </button>
+        )}
         <br />
         <br />
-        <input type="text"></input>
-        <button>Submit Answer</button>
+        <br />
+        <br />
+        <div>Here you can submit your answer (1, 2, 3, 5, 8, 13, 21, ...)</div>
+        <input
+          type="text"
+          label="1, 2, 3, 5, 8, 13, 21, ..."
+          onChange={evt => this.setState({ estimation: evt.target.value })}
+        ></input>
+        <button onClick={this.submitEstimation.bind(this)}>
+          Submit Answer
+        </button>
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <div>
+          Here you can start a new estimation by defining the name of the task
+        </div>
+        <input
+          type="text"
+          palceholder="Name of the task"
+          onChange={evt => this.setState({ task: evt.target.value })}
+        ></input>
+        <button onClick={this.submitTask.bind(this)}>
+          New estimation for this task
+        </button>
         {/* <div style={{ maxWidth: `300px`, marginBottom: `1.45rem` }}>
           <Image />
         </div> */}
