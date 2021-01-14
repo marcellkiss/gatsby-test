@@ -7,6 +7,19 @@ module.exports = {
   plugins: [
     `gatsby-plugin-react-helmet`,
     {
+      resolve: "gatsby-plugin-firebase",
+      options: {
+        credentials: {
+          apiKey: "AIzaSyByYt8ki2Q3LWd75NFojxqQpZ-tnV_8z5w",
+          authDomain: "planning-poker-b8f66.firebaseapp.com",
+          projectId: "planning-poker-b8f66",
+          storageBucket: "planning-poker-b8f66.appspot.com",
+          messagingSenderId: "1013370510327",
+          appId: "1:1013370510327:web:b12b10d63bf377144eacf2",
+        },
+      },
+    },
+    {
       resolve: `gatsby-source-filesystem`,
       options: {
         name: `images`,
