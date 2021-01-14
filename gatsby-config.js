@@ -1,6 +1,6 @@
 module.exports = {
   siteMetadata: {
-    title: `Planning Poker`,
+    title: `SI - Planning Poker (beta)`,
     description: `Kick off your next, great Gatsby project with this default starter. This barebones starter ships with the main Gatsby configuration files you might need.`,
     author: `@gatsbyjs`,
   },
@@ -9,6 +9,9 @@ module.exports = {
     {
       resolve: "gatsby-plugin-firebase",
       options: {
+        features: {
+          firestore: true,
+        },
         credentials: {
           apiKey: "AIzaSyByYt8ki2Q3LWd75NFojxqQpZ-tnV_8z5w",
           authDomain: "planning-poker-b8f66.firebaseapp.com",

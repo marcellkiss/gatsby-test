@@ -3,8 +3,6 @@ import React from "react"
 import Layout from "../components/layout"
 import SEO from "../components/seo"
 
-const db = firebase.firestore()
-
 class IndexPage extends React.Component {
   currentRoundDocRef = null
   roundsColletionRef = null
@@ -12,9 +10,13 @@ class IndexPage extends React.Component {
 
   constructor() {
     super()
-
     this.state = { currentRound: {} }
 
+    if (typeof window === "undefined") {
+      return
+    }
+
+    const db = firebase.firestore()
     this.roundsColletionRef = db.collection("rounds")
 
     this.roundsColletionRef
@@ -68,7 +70,7 @@ class IndexPage extends React.Component {
     return (
       <Layout>
         <SEO title="Home" />
-        <h1>{this.state.docId}</h1>
+        {/* <h1>{this.state.docId}</h1> */}
         Task to estimate: <b>{this.state.currentRound.task}</b>
         {this.state.currentRound.visible && (
           <div>
